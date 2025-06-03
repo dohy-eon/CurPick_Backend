@@ -22,8 +22,6 @@ class CrawlerTest {
     void testGetJobCount() {
         // given
         Map<String, Object> condition = new HashMap<>();
-        condition.put("keyword", "금융");  // ✅ 실제 Crawler에서 요구하는 key
-        condition.put("local", "부산");  // ✅ 지역 코드로 바꿔야 할 수도 있음
 
         // when & then
         assertDoesNotThrow(() -> {

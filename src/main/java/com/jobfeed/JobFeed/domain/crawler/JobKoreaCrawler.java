@@ -71,18 +71,23 @@ public class JobKoreaCrawler {
     }
 
     private int parseTotalCount(String responseBody) {
+        // 1. 응답이 단순 숫자인 경우 먼저 처리
         try {
-            JsonNode root = objectMapper.readTree(responseBody);
-            JsonNode countNode = root.path(TOTAL_COUNT_KEY);
-
-            if (countNode.isMissingNode() || !countNode.isInt()) {
+            return Integer.parseInt(responseBody.trim());
+        } catch (NumberFormatException e) {
+            // 2. JSON 객체인 경우 처리
+            try {
+                JsonNode root = objectMapper.readTree(responseBody);
+                JsonNode countNode = root.path(TOTAL_COUNT_KEY);
+                if (countNode.isMissingNode() || !countNode.isInt()) {
+                    throw new CustomException("INVALID_RESPONSE_FORMAT",
+                            "응답 JSON에서 'TotalCount'를 찾을 수 없거나 형식이 잘못됨: " + responseBody);
+                }
+                return countNode.asInt();
+            } catch (Exception ex) {
                 throw new CustomException("INVALID_RESPONSE_FORMAT",
-                        "응답 JSON에서 'TotalCount'를 찾을 수 없거나 형식이 잘못됨: " + responseBody);
+                        "응답 JSON 파싱 실패: " + ex.getMessage() + " / 원본 응답: " + responseBody);
             }
-            return countNode.asInt();
-        } catch (Exception e) {
-            throw new CustomException("INVALID_RESPONSE_FORMAT",
-                    "응답 JSON 파싱 실패: " + e.getMessage());
         }
     }
 }
