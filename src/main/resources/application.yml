@@ -1,0 +1,23 @@
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  access-token-validity-in-ms: 3600000       # 1시간
+  refresh-token-validity-in-ms: 1209600000   # 14일
+
+spring:
+  mail:
+    host: smtp.naver.com
+    port: 465
+    username: ${NAVER_MAIL}
+    password: ${NAVER_PASSWD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+            trust: smtp.naver.com
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
