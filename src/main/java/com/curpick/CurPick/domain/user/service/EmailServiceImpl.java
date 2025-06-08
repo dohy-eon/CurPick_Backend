@@ -23,7 +23,7 @@ public class EmailServiceImpl implements EmailService {
         // 실제로는 Redis 같은 DB에 저장하는 게 안정적
         authStorage.put(email, code);
 
-        String subject = "[JobFeed] 이메일 인증 코드입니다.";
+        String subject = "[CurPick] 이메일 인증 코드입니다.";
         String text = "인증 코드: " + code + "\n5분 내에 입력해 주세요.";
 
         SimpleMailMessage message = new SimpleMailMessage();
