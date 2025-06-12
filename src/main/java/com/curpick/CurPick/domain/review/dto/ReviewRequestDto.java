@@ -1,4 +1,4 @@
-package com.curpick.CurPick.domain.review.dto.request;
+package com.curpick.CurPick.domain.review.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
