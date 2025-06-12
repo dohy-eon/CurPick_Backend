@@ -17,7 +17,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    // 🔹 후기 등록
+    // 후기 등록
     @PostMapping
     public ResponseEntity<ReviewResponseDto> createReview(@RequestBody ReviewRequestDto dto) {
         ReviewResponseDto created = reviewService.createReview(dto);
@@ -25,21 +25,21 @@ public class ReviewController {
                 .body(created);
     }
 
-    // 🔹 전체 후기 목록
+    // 전체 후기 목록
     @GetMapping
     public ResponseEntity<List<ReviewResponseDto>> getAllReviews() {
         List<ReviewResponseDto> reviews = reviewService.getAllReviews();
         return ResponseEntity.ok(reviews);
     }
 
-    // 🔹 단일 후기 조회
+    // 단일 후기 조회
     @GetMapping("/{id}")
     public ResponseEntity<ReviewResponseDto> getReview(@PathVariable Long id) {
         ReviewResponseDto review = reviewService.getReviewById(id);
         return ResponseEntity.ok(review);
     }
 
-    // 🔹 후기 수정
+    // 후기 수정
     @PutMapping("/{id}")
     public ResponseEntity<ReviewResponseDto> updateReview(@PathVariable Long id,
                                                           @RequestBody ReviewRequestDto dto) {
@@ -47,7 +47,7 @@ public class ReviewController {
         return ResponseEntity.ok(updated);
     }
 
-    // 🔹 후기 삭제
+    // 후기 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
         reviewService.deleteReview(id);
