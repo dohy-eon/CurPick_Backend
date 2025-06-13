@@ -1,6 +1,8 @@
 package com.curpick.CurPick.domain.user.controller;
 
 import com.curpick.CurPick.domain.user.dto.LoginRequestDto;
+import com.curpick.CurPick.domain.user.dto.LoginResponseDto;
+import com.curpick.CurPick.domain.user.dto.LoginResultDto;
 import com.curpick.CurPick.domain.user.dto.SignupRequestDto;
 import com.curpick.CurPick.domain.user.service.UserService;
 import com.curpick.CurPick.global.auth.dto.TokenBox;
@@ -107,14 +109,16 @@ public class UserController {
             )
     })
     @PostMapping("/auth/login")
-    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequestDto request) {
-        TokenBox tokenBox = userService.login(request);
+    public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto request) {
+        LoginResultDto result = userService.login(request);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Access-Token", tokenBox.getAccessToken());
-        headers.add("Refresh-Token", tokenBox.getRefreshToken());
-        headers.add("Authority", tokenBox.getAuthority());
+        headers.add("Access-Token", result.getTokenBox().getAccessToken());
+        headers.add("Refresh-Token", result.getTokenBox().getRefreshToken());
+        headers.add("Authority", result.getTokenBox().getAuthority());
 
-        return ResponseEntity.ok().headers(headers).build();
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(result.getUser());
     }
 }

@@ -1,6 +1,8 @@
 package com.curpick.CurPick.domain.user.service;
 
 import com.curpick.CurPick.domain.user.dto.LoginRequestDto;
+import com.curpick.CurPick.domain.user.dto.LoginResponseDto;
+import com.curpick.CurPick.domain.user.dto.LoginResultDto;
 import com.curpick.CurPick.domain.user.dto.SignupRequestDto;
 import com.curpick.CurPick.domain.user.entity.User;
 import com.curpick.CurPick.domain.user.exception.UserErrorCode;
@@ -84,7 +86,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public TokenBox login(LoginRequestDto request) {
+    public LoginResultDto login(LoginRequestDto request) {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new CustomException(
                         UserErrorCode.INVALID_CREDENTIALS.getCode(),
@@ -101,10 +103,21 @@ public class UserService {
         String accessToken = jwtTokenProvider.createAccessToken(user);
         String refreshToken = jwtTokenProvider.createRefreshToken(user);
 
-        return TokenBox.builder()
+        TokenBox tokenBox = TokenBox.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .authority(user.getRole().name())
+                .build();
+
+        LoginResponseDto userDto = LoginResponseDto.builder()
+                .nickname(user.getNickname())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .build();
+
+        return LoginResultDto.builder()
+                .tokenBox(tokenBox)
+                .user(userDto)
                 .build();
     }
 
