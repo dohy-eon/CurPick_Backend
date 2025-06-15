@@ -140,13 +140,10 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<LoginResponseDto> getProfile(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        // UserDetails에서 현재 사용자 정보 가져오기
         return ResponseEntity.ok(userService.getUserProfile(userDetails.getUser().getId()));
     }
 
-    /**
-     * 현재 로그인한 사용자의 닉네임 수정
-     */
+    // 닉네임 수정
     @PutMapping("/profile")
     public ResponseEntity<Void> updateProfile(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                               @Valid @RequestBody UpdateNicknameRequestDto updateRequest) {

@@ -20,7 +20,6 @@ public class EmailServiceImpl implements EmailService {
     public void sendAuthCode(String email) {
         String code = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
 
-        // 실제로는 Redis 같은 DB에 저장하는 게 안정적
         authStorage.put(email, code);
 
         String subject = "[CurPick] 이메일 인증 코드입니다.";

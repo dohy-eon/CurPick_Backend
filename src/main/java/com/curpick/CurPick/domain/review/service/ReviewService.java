@@ -17,7 +17,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
 
-    // 🔹 리뷰 생성
+    // 리뷰 생성
     @Transactional
     public ReviewResponseDto createReview(ReviewRequestDto dto) {
         Review review = Review.builder()
@@ -32,7 +32,7 @@ public class ReviewService {
         return toDto(saved);
     }
 
-    // 🔹 전체 리뷰 조회
+    // 전체 리뷰 조회
     @Transactional(readOnly = true)
     public List<ReviewResponseDto> getAllReviews() {
         return reviewRepository.findAll().stream()
@@ -40,7 +40,7 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
-    // 🔹 단일 리뷰 조회
+    // 단일 리뷰 조회
     @Transactional(readOnly = true)
     public ReviewResponseDto getReviewById(Long id) {
         Review review = reviewRepository.findById(id)
@@ -48,7 +48,7 @@ public class ReviewService {
         return toDto(review);
     }
 
-    // 🔹 리뷰 수정
+    // 리뷰 수정
     @Transactional
     public ReviewResponseDto updateReview(Long id, ReviewRequestDto dto) {
         Review review = reviewRepository.findById(id)
@@ -63,7 +63,7 @@ public class ReviewService {
         return toDto(review);
     }
 
-    // 🔹 리뷰 삭제
+    // 리뷰 삭제
     @Transactional
     public void deleteReview(Long id) {
         if (!reviewRepository.existsById(id)) {
@@ -72,7 +72,7 @@ public class ReviewService {
         reviewRepository.deleteById(id);
     }
 
-    // 🔹 Entity → DTO 변환
+    // Entity → DTO 변환
     private ReviewResponseDto toDto(Review review) {
         return ReviewResponseDto.builder()
                 .id(review.getId())

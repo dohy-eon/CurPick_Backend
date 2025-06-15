@@ -117,17 +117,11 @@ public class UserService {
         String accessToken = jwtTokenProvider.createAccessToken(user);
         String refreshToken = jwtTokenProvider.createRefreshToken(user);
 
-        log.info("Generated Access Token: {}", accessToken);
-        log.info("Generated Refresh Token: {}", refreshToken);
-
         TokenBox tokenBox = TokenBox.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .authority(user.getRole().name())
                 .build();
-
-        // TokenBox 생성 확인을 위한 로그
-        log.info("Created TokenBox: {}", tokenBox);
 
         LoginResponseDto userDto = LoginResponseDto.builder()
                 .id(user.getId())
@@ -169,14 +163,12 @@ public class UserService {
                 .build();
     }
 
-    /**
-     * 사용자 닉네임 수정
-     */
+    // 닉네임 수정
     public void updateNickname(Long userId, String newNickname) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
 
         user.updateNickname(newNickname);
-        userRepository.save(user); // 변경사항 저장
+        userRepository.save(user);
     }
 }

@@ -5,17 +5,11 @@ import com.curpick.CurPick.global.auth.userdetails.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
-
 import java.security.Key;
 import java.util.Date;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collection;
 import java.util.Collections;
 
 @Component
@@ -86,11 +80,10 @@ public class JwtTokenProvider {
     // 권한 생성
     SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority);
 
-    // 실제 User 객체를 작성
     User user = User.builder()
             .id(id)
             .username(username)
-            .password("") // JWT에는 비밀번호를 보통 포함하지 않음
+            .password("")
             .email(email)
             .nickname(nickname)
             .build();

@@ -2,7 +2,6 @@ package com.curpick.CurPick.global.config;
 
 import com.curpick.CurPick.global.auth.jwt.JwtTokenProvider;
 import com.curpick.CurPick.global.security.JwtAuthenticationFilter;
-import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,9 +25,9 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor // 이 어노테이션을 통해 final 필드들에 대한 생성자가 자동으로 생성됩니다
+@RequiredArgsConstructor
 public class SecurityConfig {
-    private final JwtTokenProvider jwtTokenProvider; // final 키워드 추가
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -70,7 +69,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config); // 전체 경로에 대해 적용
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 

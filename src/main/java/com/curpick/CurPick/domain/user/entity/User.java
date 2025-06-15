@@ -56,7 +56,7 @@ public class User {
         this.username = username;
         this.password = password;
         this.email = email;
-        this.role = role == null ? Role.USER : role;  // 기본 값을 지정
+        this.role = role == null ? Role.USER : role;
     }
 
     public void verifyEmail() {
@@ -67,6 +67,6 @@ public class User {
         if (nickname == null || nickname.trim().isEmpty()) {
             throw new IllegalArgumentException("닉네임은 비어있을 수 없습니다.");
         }
-        this.nickname = nickname; // 닉네임 업데이트
+        this.nickname = nickname;
     }
 }
