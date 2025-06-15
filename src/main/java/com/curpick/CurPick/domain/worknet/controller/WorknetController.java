@@ -14,15 +14,20 @@ import org.springframework.web.bind.annotation.*;
 public class WorknetController {
 
     private final WorknetService service;
-    private static final Logger log = LoggerFactory.getLogger(WorknetController.class); // 로그 추가
+    private static final Logger log = LoggerFactory.getLogger(WorknetController.class);
 
-    @GetMapping("/job")
-    public ResponseEntity<WorknetResponseDto> getJobInfoByCode(@RequestParam String code) {
+    /**
+     * 전체 직업 목록 조회
+     */
+    @GetMapping("/jobs") // URL도 복수형으로
+    public ResponseEntity<WorknetResponseDto> getAllJobs() {
         try {
-            WorknetResponseDto res = service.fetchJobByCode(code);
+            log.info("[WorknetController] 전체 직업 목록 요청 시작");
+            WorknetResponseDto res = service.fetchAllJobs();
+            log.info("[WorknetController] 전체 직업 목록 요청 성공");
             return ResponseEntity.ok(res);
         } catch (Exception e) {
-            log.error("[WorknetController] 직업 코드 기반 API 호출 오류", e);
+            log.error("[WorknetController] 전체 직업 목록 조회 실패", e);
             return ResponseEntity.status(500).build();
         }
     }
