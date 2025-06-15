@@ -8,27 +8,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/worknet")
 @RequiredArgsConstructor
 public class WorknetController {
 
-    private final WorknetService service;
-    private static final Logger log = LoggerFactory.getLogger(WorknetController.class);
+    private final WorknetService worknetService;
 
-    /**
-     * 전체 직업 목록 조회
-     */
-    @GetMapping("/jobs") // URL도 복수형으로
-    public ResponseEntity<WorknetResponseDto> getAllJobs() {
-        try {
-            log.info("[WorknetController] 전체 직업 목록 요청 시작");
-            WorknetResponseDto res = service.fetchAllJobs();
-            log.info("[WorknetController] 전체 직업 목록 요청 성공");
-            return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            log.error("[WorknetController] 전체 직업 목록 조회 실패", e);
-            return ResponseEntity.status(500).build();
-        }
+    @GetMapping("/jobs")
+    public ResponseEntity<List<WorknetResponseDto.Job>> getJobs(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "15") int size) throws Exception {
+
+        List<WorknetResponseDto.Job> jobs = worknetService.getJobsByPage(page, size);
+
+        return ResponseEntity.ok(jobs);
     }
 }
