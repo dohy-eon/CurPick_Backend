@@ -60,6 +60,8 @@ dependencies {
 
 	// XML 매핑용
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
 tasks.named('test') {
