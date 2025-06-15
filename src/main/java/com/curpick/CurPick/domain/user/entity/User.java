@@ -62,4 +62,11 @@ public class User {
     public void verifyEmail() {
         this.emailVerified = true;
     }
+
+    public void updateNickname(String nickname) {
+        if (nickname == null || nickname.trim().isEmpty()) {
+            throw new IllegalArgumentException("닉네임은 비어있을 수 없습니다.");
+        }
+        this.nickname = nickname; // 닉네임 업데이트
+    }
 }

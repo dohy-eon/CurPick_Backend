@@ -1,9 +1,6 @@
 package com.curpick.CurPick.domain.user.controller;
 
-import com.curpick.CurPick.domain.user.dto.LoginRequestDto;
-import com.curpick.CurPick.domain.user.dto.LoginResponseDto;
-import com.curpick.CurPick.domain.user.dto.LoginResultDto;
-import com.curpick.CurPick.domain.user.dto.SignupRequestDto;
+import com.curpick.CurPick.domain.user.dto.*;
 import com.curpick.CurPick.domain.user.service.UserService;
 import com.curpick.CurPick.global.auth.dto.TokenBox;
 import com.curpick.CurPick.global.auth.userdetails.UserDetailsImpl;
@@ -139,6 +136,22 @@ public class UserController {
 
         List<LoginResponseDto> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<LoginResponseDto> getProfile(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        // UserDetails에서 현재 사용자 정보 가져오기
+        return ResponseEntity.ok(userService.getUserProfile(userDetails.getUser().getId()));
+    }
+
+    /**
+     * 현재 로그인한 사용자의 닉네임 수정
+     */
+    @PutMapping("/profile")
+    public ResponseEntity<Void> updateProfile(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                              @Valid @RequestBody UpdateNicknameRequestDto updateRequest) {
+        userService.updateNickname(userDetails.getUser().getId(), updateRequest.getNickname());
+        return ResponseEntity.ok().build();
     }
 
 }
