@@ -12,14 +12,20 @@ import com.curpick.CurPick.global.auth.jwt.JwtTokenProvider;
 import com.curpick.CurPick.global.auth.userdetails.UserDetailsImpl;
 import com.curpick.CurPick.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.curpick.CurPick.domain.user.exception.UserErrorCode.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -77,11 +83,19 @@ public class UserService {
 
     @Transactional
     public TokenBox tokenRotation(UserDetailsImpl userDetails) {
-        // 실제 구현 시 JWT 유틸 클래스에서 토큰 생성 필요
+        User user = userDetails.getUser();
+
+        String newAccessToken = jwtTokenProvider.createAccessToken(user);
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(user);
+
+        String authorities = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
         return TokenBox.builder()
-                .accessToken("new-access-token")
-                .refreshToken("new-refresh-token")
-                .authority(userDetails.getAuthorities().toString())
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .authority(authorities)
                 .build();
     }
 
@@ -103,16 +117,24 @@ public class UserService {
         String accessToken = jwtTokenProvider.createAccessToken(user);
         String refreshToken = jwtTokenProvider.createRefreshToken(user);
 
+        log.info("Generated Access Token: {}", accessToken);
+        log.info("Generated Refresh Token: {}", refreshToken);
+
         TokenBox tokenBox = TokenBox.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .authority(user.getRole().name())
                 .build();
 
+        // TokenBox 생성 확인을 위한 로그
+        log.info("Created TokenBox: {}", tokenBox);
+
         LoginResponseDto userDto = LoginResponseDto.builder()
+                .id(user.getId())
                 .nickname(user.getNickname())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .authority(user.getRole().name())
                 .build();
 
         return LoginResultDto.builder()
@@ -121,4 +143,16 @@ public class UserService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public List<LoginResponseDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> LoginResponseDto.builder()
+                        .id(user.getId())
+                        .nickname(user.getNickname())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .authority(user.getRole().name())
+                        .build())
+                .toList();
+    }
 }

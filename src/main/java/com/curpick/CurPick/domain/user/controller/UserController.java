@@ -17,9 +17,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -121,4 +124,21 @@ public class UserController {
                 .headers(headers)
                 .body(result.getUser());
     }
+    @Operation(summary = "전체 유저 조회 (관리자 전용)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "유저 리스트 반환 성공"),
+            @ApiResponse(responseCode = "403", description = "접근 권한 없음")
+    })
+    @GetMapping("/admin/users")
+    @PreAuthorize("hasRole('ADMIN')")  // 메서드 진입 전에 권한 체크
+    public ResponseEntity<List<LoginResponseDto>> getAllUsers(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            // 인증 안 된 상태면 401 Unauthorized 반환
+            return ResponseEntity.status(401).build();
+        }
+
+        List<LoginResponseDto> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
 }

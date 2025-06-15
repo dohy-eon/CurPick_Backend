@@ -1,88 +1,114 @@
 package com.curpick.CurPick.global.auth.jwt;
 
 import com.curpick.CurPick.domain.user.entity.User;
+import com.curpick.CurPick.global.auth.userdetails.UserDetailsImpl;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
+import java.security.Key;
 import java.util.Date;
 
-@Slf4j
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.Collections;
+
 @Component
 public class JwtTokenProvider {
 
-    private final SecretKey key;
-    private final long accessTokenValidityInMs;
-    private final long refreshTokenValidityInMs;
+    private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final long accessTokenValidity = 1000 * 60 * 30;          // 30분
+    private final long refreshTokenValidity = 1000 * 60 * 60 * 24 * 7; // 7일
 
-    public JwtTokenProvider(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-token-validity-in-ms}") long accessTokenValidityInMs,
-            @Value("${jwt.refresh-token-validity-in-ms}") long refreshTokenValidityInMs
-    ) {
-        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
-        this.accessTokenValidityInMs = accessTokenValidityInMs;
-        this.refreshTokenValidityInMs = refreshTokenValidityInMs;
-    }
-
-    // AccessToken 생성
     public String createAccessToken(User user) {
+        Claims claims = Jwts.claims().setSubject(user.getUsername());
+        claims.put("id", user.getId());
+        claims.put("email", user.getEmail());
+        claims.put("nickname", user.getNickname());
+        claims.put("auth", "ROLE_" + user.getRole().name());
+
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + accessTokenValidityInMs);
+        Date validity = new Date(now.getTime() + 1000 * 60 * 60); // 토큰 유효기간 설정 (1시간)
 
         return Jwts.builder()
-                .setSubject(user.getUsername())
-                .claim("userId", user.getId())
-                .claim("role", user.getRole().name())
-                .setIssuedAt(now)
-                .setExpiration(expiry)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+                .setClaims(claims) // 사용자 정보를 담은 클레임
+                .setIssuedAt(now)  // 토큰 생성 시간
+                .setExpiration(validity) // 토큰 만료 시간
+                .signWith(secretKey) // 서명 키
+                .compact(); // 토큰 생성
     }
 
-    // RefreshToken 생성
     public String createRefreshToken(User user) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + refreshTokenValidityInMs);
-
         return Jwts.builder()
                 .setSubject(user.getUsername())
+                .claim("auth", "ROLE_" + user.getRole().name())  // 권한 정보 추가
                 .setIssuedAt(now)
-                .setExpiration(expiry)
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setExpiration(new Date(now.getTime() + refreshTokenValidity))
+                .signWith(secretKey)
                 .compact();
     }
 
-    // 토큰 유효성 검증
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
             return true;
-        } catch (SecurityException | MalformedJwtException e) {
-            log.debug("잘못된 JWT 서명입니다.");
-        } catch (ExpiredJwtException e) {
-            log.debug("만료된 JWT 토큰입니다.");
-        } catch (UnsupportedJwtException e) {
-            log.debug("지원하지 않는 JWT 토큰입니다.");
-        } catch (IllegalArgumentException e) {
-            log.debug("JWT 토큰이 잘못되었습니다.");
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
         }
-        return false;
     }
 
-    // 토큰에서 사용자명 추출
     public String getUsername(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey).build()
+                .parseClaimsJws(token)
+                .getBody().getSubject();
     }
 
-    // 토큰에서 클레임 추출
-    public Claims getClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token).getBody();
-    }
+    public Authentication getAuthentication(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+    Long id = claims.get("id", Long.class);  // 클레임에서 id 추출
+    String username = claims.getSubject();  // 기본적으로 Subject에 저장된 username
+    String email = claims.get("email", String.class);
+    String nickname = claims.get("nickname", String.class);
+    String authority = claims.get("auth", String.class); 
+
+    // 권한 생성
+    SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority);
+
+    // 실제 User 객체를 작성
+    User user = User.builder()
+            .id(id)
+            .username(username)
+            .password("") // JWT에는 비밀번호를 보통 포함하지 않음
+            .email(email)
+            .nickname(nickname)
+            .build();
+
+    // UserDetailsImpl 사용
+    UserDetailsImpl userDetails = new UserDetailsImpl(user);
+
+    return new UsernamePasswordAuthenticationToken(
+            userDetails,
+            "",
+            Collections.singleton(grantedAuthority)
+    );
+}
+public Claims getClaims(String token) {
+    return Jwts.parserBuilder()
+            .setSigningKey(secretKey)
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+}
 }

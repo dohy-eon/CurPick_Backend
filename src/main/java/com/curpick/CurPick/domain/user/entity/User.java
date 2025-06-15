@@ -50,12 +50,13 @@ public class User {
     private LocalDateTime createdAt;
 
     @Builder
-    public User(String nickname, String username, String password, String email) {
+    public User(Long id, String nickname, String username, String password, String email, Role role) {
+        this.id = id;
         this.nickname = nickname;
         this.username = username;
         this.password = password;
         this.email = email;
-        this.role = Role.USER;
+        this.role = role == null ? Role.USER : role;  // 기본 값을 지정
     }
 
     public void verifyEmail() {
