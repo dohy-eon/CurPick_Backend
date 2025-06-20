@@ -69,3 +69,7 @@ CurPick은 다음과 같은 주요 기능을 제공합니다.
 - 게시글 삭제 및 관리 기능
 
 ---
+
+## 실행 영상
+https://github.com/user-attachments/assets/d273ec24-7243-4dfb-8bd3-e7e34977f093
+
